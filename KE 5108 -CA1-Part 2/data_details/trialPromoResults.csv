@@ -1,4 +1,4 @@
-index, sex, mstatus, age, children, occupation, education, income, avbal, avtrans, decision
+index,sex,mstatus,age,children,occupation,education,income,avbal,avtrans,decision
 1,F,married,56.82,1,legal,secondary,3105.39,33003.48,1776.81,None
 2,M,widowed,87.35,3,retired,tertiary,4874.08,18941.99,863.56,None
 3,M,single,28.75,0,manuf,professional,14232.37,30013.32,3231.14,B
