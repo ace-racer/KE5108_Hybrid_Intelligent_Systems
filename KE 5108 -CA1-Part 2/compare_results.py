@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import sys
+from sklearn.metrics import confusion_matrix, accuracy_score, f1_score
 
 NUM_CUSTOMERS = 400
 
@@ -10,12 +11,25 @@ def compare_status_score_with_actuals(actuals_df, current_df):
         actual_status_scores_for_required_customers = actuals_df[actuals_df["index"].isin(required_customer_ids)][["index", "status", "score"]].reset_index(drop=True)
         actual_status_scores_for_required_customers.sort_values(by="index", inplace=True)
         current_df.sort_values(by="index", inplace=True)
-        print(actual_status_scores_for_required_customers)
+        #print(actual_status_scores_for_required_customers)
         current_df["actual_status"] = actual_status_scores_for_required_customers["status"]
         current_df["actual_score"] = actual_status_scores_for_required_customers["score"]
         current_df["is_status_diff"] = current_df["actual_status"] != current_df["status"]
         current_df["absolute_score_diff"] = abs(current_df["actual_score"] - current_df["score"])
-        print(current_df)
+        #print(current_df)
+        current_df.to_csv("results/comparison_results.csv", index=False)
+        print("Generated the comparison results here: {0}".format("results/comparison_results.csv"))
+
+        mean_absolute_error = np.average(current_df["absolute_score_diff"])
+        print("Mean absolute error of scores: {0}".format(mean_absolute_error))
+
+        cm = confusion_matrix(current_df["actual_status"], current_df["status"])
+        a = accuracy_score(current_df["actual_status"], current_df["status"])
+        #f1 = f1_score(current_df["actual_status"], current_df["status"])
+
+        print(cm)
+        print("Accuracy: {0}".format(a))
+        #print("F1 score: {0}".format(f1))
 
 if __name__ == "__main__":
     """python compare_results.py "H:\\KE 5108 - CAs\\code\\KE 5108 -CA1-Part 2\\working_data\\trial_output.csv" """
