@@ -84,7 +84,7 @@ if __name__ == "__main__":
         current_df = pd.read_csv(sys.argv[1], header=0, index_col=False)
         actuals_df = pd.read_csv("original_data/cust_actual_merged.csv", header=0, index_col=False)
 
-        if current_df.shape[0] != NUM_CUSTOMERS:
-            raise ValueError("Number of customers in the current file should be {0}".format(NUM_CUSTOMERS))
+        #if current_df.shape[0] != NUM_CUSTOMERS:
+            #raise ValueError("Number of customers in the current file should be {0}".format(NUM_CUSTOMERS))
 
         compare_status_score_with_actuals(actuals_df, current_df)
