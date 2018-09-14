@@ -7,12 +7,14 @@ NUM_CUSTOMERS = 400
 def compare_status_score_with_actuals(actuals_df, current_df):
     if actuals_df is not None and current_df is not None:
         required_customer_ids = current_df["index"]
-        actual_status_scores_for_required_customers = actuals_df[actuals_df["index"].isin(required_customer_ids)][["index", "status", "score"]]
+        actual_status_scores_for_required_customers = actuals_df[actuals_df["index"].isin(required_customer_ids)][["index", "status", "score"]].reset_index(drop=True)
         actual_status_scores_for_required_customers.sort_values(by="index", inplace=True)
         current_df.sort_values(by="index", inplace=True)
         print(actual_status_scores_for_required_customers)
         current_df["actual_status"] = actual_status_scores_for_required_customers["status"]
         current_df["actual_score"] = actual_status_scores_for_required_customers["score"]
+        current_df["is_status_diff"] = current_df["actual_status"] != current_df["status"]
+        current_df["absolute_score_diff"] = abs(current_df["actual_score"] - current_df["score"])
         print(current_df)
 
 if __name__ == "__main__":
