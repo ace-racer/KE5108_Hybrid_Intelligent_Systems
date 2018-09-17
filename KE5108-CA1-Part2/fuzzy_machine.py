@@ -167,6 +167,6 @@ for index, row in df.iterrows():
     pfscore = pf.calculate(row)
     wt = -0.4
     final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
-    df.loc[index, 'score'] = final_score
+    df.loc[index, 'score'] = round(final_score, 2)
 
 df.to_csv('./results/predicted_scores.csv')
