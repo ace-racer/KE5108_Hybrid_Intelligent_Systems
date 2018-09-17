@@ -165,8 +165,8 @@ df = df.rename(columns=lambda x: x.strip())
 for index, row in df.iterrows():
     afscore = af.calculate(row)
     pfscore = pf.calculate(row)
-    wt = -0.4
+    wt = -0.4  # weigh heavily towards account factors : full range (-0.5, 0.5)
     final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
     df.loc[index, 'score'] = round(final_score, 2)
 
-df.to_csv('./results/predicted_scores.csv')
+df.to_csv('./results/predicted_scores.csv', index=False)
