@@ -4,6 +4,10 @@ import skfuzzy as fuzz
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
 
+def mean_absolute_percentage_error(y_true, y_pred):
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / y_true)) * 100
+
 
 class AccountFactors:
     max_activity = 10000.0
@@ -176,5 +180,6 @@ for index, row in df.iterrows():
 df['actual_score'] = df_actual['actual_score']
 print("Weight = {0}".format(wt))
 print(mean_absolute_error(df['actual_score'], df['score']))
+print(mean_absolute_percentage_error(df['actual_score'], df['score']))
 
 #df.to_csv('./results/predicted_scores.csv', index=False)
