@@ -1,0 +1,1 @@
+Best profit attainable: 1238 - customer details here: KE5108-CA1-Part2\results\best_possible_campaign.csv
