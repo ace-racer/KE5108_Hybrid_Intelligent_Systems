@@ -158,7 +158,7 @@ pf = PersonalFactors()
 # final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
 
 
-df = pd.read_csv('./original_data/trialPromoResults.csv')
+df = pd.read_csv('./original_data/custdatabase.csv')
 
 df = df.rename(columns=lambda x: x.strip())
 
@@ -167,6 +167,6 @@ for index, row in df.iterrows():
     pfscore = pf.calculate(row)
     wt = -0.4
     final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
-    df.loc[index, 'predict_score'] = final_score
+    df.loc[index, 'score'] = final_score
 
 df.to_csv('./results/predicted_scores.csv')
