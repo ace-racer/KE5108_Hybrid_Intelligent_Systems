@@ -4,9 +4,10 @@ import skfuzzy as fuzz
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
 
+
 class AccountFactors:
-    max_activity = 8150.0
-    max_balance = 80000.0
+    max_activity = 10000.0
+    max_balance = 100000.0
 
     def __init__(self):
         # activity fuzzy
@@ -48,8 +49,8 @@ class AccountFactors:
 
 
 class PersonalFactors:
-    max_income = 20000
-    max_age = 90
+    max_income = 25000
+    max_age = 120
 
     def __init__(self):
         # income fuzzy
@@ -160,20 +161,20 @@ pf = PersonalFactors()
 
 df = pd.read_csv('./original_data/custdatabase.csv')
 df_actual = pd.read_csv('./results/comparison_results.csv')
-
 df = df.rename(columns=lambda x: x.strip())
-
+#
+# for wt in [-0.5, -0.45, -0.4, -0.35]:
+wt = -0.45
 for index, row in df.iterrows():
     afscore = af.calculate(row)
     pfscore = pf.calculate(row)
-    wt = -0.45  # weigh heavily towards account factors : full range (-0.5, 0.5)
+    # wt = -0.45  # weigh heavily towards account factors : full range (-0.5, 0.5)
     final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
     df.loc[index, 'score'] = round(final_score, 2)
 
-
 # calc mae
 df['actual_score'] = df_actual['actual_score']
+print("Weight = {0}".format(wt))
 print(mean_absolute_error(df['actual_score'], df['score']))
 
-df.to_csv('./results/predicted_scores.csv', index=False)
-
+#df.to_csv('./results/predicted_scores.csv', index=False)
