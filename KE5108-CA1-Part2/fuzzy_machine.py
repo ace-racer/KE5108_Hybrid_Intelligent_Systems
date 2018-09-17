@@ -4,11 +4,56 @@ import skfuzzy as fuzz
 import pandas as pd
 
 
+class AccountFactors:
+    max_activity = 8150.0
+    max_balance = 80000.0
+
+    def __init__(self):
+        # activity fuzzy
+        activity = ctrl.Antecedent(np.arange(0, self.max_activity, 1), 'activity')
+        investment_score = ctrl.Consequent(np.arange(0, 11, 1), 'investment_score')
+        activity.automf(3)
+        investment_score.automf(3)
+        rule1 = ctrl.Rule(activity['poor'], investment_score['poor'])
+        rule2 = ctrl.Rule(activity['average'], investment_score['average'])
+        rule3 = ctrl.Rule(activity['good'], investment_score['good'])
+        self.activity_is_ctrl = ctrl.ControlSystem([rule1, rule2, rule3])
+        self.activity_is_t = ctrl.ControlSystemSimulation(self.activity_is_ctrl)
+
+        # balance fuzzy
+        balance = ctrl.Antecedent(np.arange(0, self.max_balance, 1), 'balance')
+        investment_score = ctrl.Consequent(np.arange(0, 11, 1), 'investment_score')
+        balance.automf(3)
+        investment_score.automf(3)
+        rule1 = ctrl.Rule(balance['poor'], investment_score['poor'])
+        rule2 = ctrl.Rule(balance['average'], investment_score['average'])
+        rule3 = ctrl.Rule(balance['good'], investment_score['good'])
+        self.balance_is_ctrl = ctrl.ControlSystem([rule1, rule2, rule3])
+        self.balance_is_t = ctrl.ControlSystemSimulation(self.balance_is_ctrl)
+
+    def activity_to_investment_fuzzy(self, activity):
+        self.activity_is_t.input['activity'] = activity
+        self.activity_is_t.compute()
+        return self.activity_is_t.output['investment_score']
+
+    def balance_to_investment_fuzzy(self, balance):
+        self.balance_is_t.input['balance'] = balance
+        self.balance_is_t.compute()
+        return self.balance_is_t.output['investment_score']
+
+    def calculate(self, row):
+        act_score = self.activity_to_investment_fuzzy(row['avtrans'])
+        bal_score = self.balance_to_investment_fuzzy(row['avbal'])
+        return (act_score + bal_score) * 0.5
+
+
 class PersonalFactors:
+    max_income = 20000
+    max_age = 90
 
     def __init__(self):
         # income fuzzy
-        income = ctrl.Antecedent(np.arange(0, 11, 1), 'income')  # TODO replace 11 by max income
+        income = ctrl.Antecedent(np.arange(0, self.max_income, 1), 'income')
         investment_score = ctrl.Consequent(np.arange(0, 11, 1), 'investment_score')
         income.automf(3)
         investment_score.automf(3)
@@ -19,7 +64,7 @@ class PersonalFactors:
         self.income_is_t = ctrl.ControlSystemSimulation(self.income_is_ctrl)
 
         # age fuzzy
-        age = ctrl.Antecedent(np.arange(0, 11, 1), 'age')  # TODO Replace 11 by max age
+        age = ctrl.Antecedent(np.arange(0, self.max_age, 1), 'age')
         investment_score = ctrl.Consequent(np.arange(0, 11, 1), 'investment_score')
         age.automf(5, names=['young', 'teen', 'middle-aged', 'senior', 'old'])
         investment_score.automf(3)
@@ -32,7 +77,7 @@ class PersonalFactors:
         self.age_is_t = ctrl.ControlSystemSimulation(self.age_is_ctrl)
 
         # income - education weighting
-        age = ctrl.Antecedent(np.arange(0, 11, 1), 'age')
+        age = ctrl.Antecedent(np.arange(0, self.max_age, 1), 'age')
         ie_weight = ctrl.Consequent(np.arange(-0.5, 0.5, 0.1), 'income_education weight')
         age.automf(5, names=['young', 'teen', 'middle-aged', 'senior', 'old'])
         ie_weight.automf(5)
@@ -64,7 +109,6 @@ class PersonalFactors:
         return ((1 - wt) * income + (1 + wt) * education) * 0.5
 
     def male_female_score(self, sex, mstatus):
-        mf_score = 0
         if sex == 'M':
             mf_score = 8
         elif sex == 'F' and mstatus != 'married':
@@ -101,21 +145,14 @@ class PersonalFactors:
         return (mf_score + occ_score + age_score + income_edu_score) / 4.0
 
 
+af = AccountFactors()
 pf = PersonalFactors()
 
-# Testing
-# income_score = pf.income_to_investment_fuzzy(6.5)
-# age_score = pf.age_to_investment_fuzzy(5)
-# ie_weight = pf.age_to_ie_weight(0)
-# mf_score = pf.male_female_score('M', 'married')
-# occ_score = pf.occupation_score('retired')
-# edu_score = pf.education_score('tertiary')
-# income_edu_score = pf.adjust_income_education_to_age(8, 5, 0)  # age 10 == old guy
+testrow = {'sex': 'M', 'mstatus': 'single', 'occupation': 'retired', 'age': 45, 'income': 20000,
+           'education': 'tertiary', 'avbal': 20000, 'avtrans': 3000}
+afscore = af.calculate(testrow)
+pfscore = pf.calculate(testrow)
 
-testrow = {'sex': 'F', 'mstatus': 'single', 'occupation': 'retired', 'age': 0, 'income': 2,
-           'education': 'tertiary'}
-print(testrow)
-pf.calculate(testrow)
-
-# print(income_score, age_score, ie_weight, mf_score, occ_score, edu_score)
-# trial_promo_results = pd.read_csv('./original_data/trialPromoResults.csv')
+# Use weighting of account, personal {-0.5, 0.5}
+wt = -0.4
+final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
