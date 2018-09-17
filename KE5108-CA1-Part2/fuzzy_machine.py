@@ -148,11 +148,25 @@ class PersonalFactors:
 af = AccountFactors()
 pf = PersonalFactors()
 
-testrow = {'sex': 'M', 'mstatus': 'single', 'occupation': 'retired', 'age': 45, 'income': 20000,
-           'education': 'tertiary', 'avbal': 20000, 'avtrans': 3000}
-afscore = af.calculate(testrow)
-pfscore = pf.calculate(testrow)
+# testrow = {'sex': 'M', 'mstatus': 'single', 'occupation': 'retired', 'age': 45, 'income': 20000,
+#            'education': 'tertiary', 'avbal': 20000, 'avtrans': 3000}
+# afscore = af.calculate(testrow)
+# pfscore = pf.calculate(testrow)
+#
+# # Use weighting of account, personal {-0.5, 0.5}
+# wt = -0.4
+# final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
 
-# Use weighting of account, personal {-0.5, 0.5}
-wt = -0.4
-final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
+
+df = pd.read_csv('./original_data/trialPromoResults.csv')
+
+df = df.rename(columns=lambda x: x.strip())
+
+for index, row in df.iterrows():
+    afscore = af.calculate(row)
+    pfscore = pf.calculate(row)
+    wt = -0.4
+    final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
+    df.loc[index, 'predict_score'] = final_score
+
+df.to_csv('./results/predicted_scores.csv')
