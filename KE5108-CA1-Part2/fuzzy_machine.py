@@ -10,8 +10,8 @@ def mean_absolute_percentage_error(y_true, y_pred):
 
 
 class AccountFactors:
-    max_activity = 10000.0
-    max_balance = 100000.0
+    max_activity = 15000.0
+    max_balance = 150000.0
 
     def __init__(self):
         # activity fuzzy
@@ -54,7 +54,7 @@ class AccountFactors:
 
 class PersonalFactors:
     max_income = 25000
-    max_age = 120
+    max_age = 95
 
     def __init__(self):
         # income fuzzy
@@ -115,29 +115,33 @@ class PersonalFactors:
 
     def male_female_score(self, sex, mstatus):
         if sex == 'M':
-            mf_score = 8
-        elif sex == 'F' and mstatus != 'married':
-            mf_score = 7
-        else:  # all other females
             mf_score = 6
+        elif sex == 'F' and mstatus != 'married':
+            mf_score = 5
+        else:  # married females
+            mf_score = 2
 
         return mf_score
 
     def occupation_score(self, occupation):
         if occupation == 'retired':
+            occ_score = 1
+        elif occupation == 'manuf' or occupation == 'construct':
             occ_score = 2
+        elif occupation == 'government':
+            occ_score = 3
         else:
-            occ_score = 8  # all other professions
+            occ_score = 6  # all other professions
 
         return occ_score
 
     def education_score(self, education):
         if education == 'postgrad' or education == 'professional':
-            return 8
-        elif education == 'tertiary':
             return 6
-        elif education == 'secondary':
+        elif education == 'tertiary':
             return 4
+        elif education == 'secondary':
+            return 1
 
     def calculate(self, row):
         mf_score = self.male_female_score(row['sex'], row['mstatus'])
@@ -178,8 +182,9 @@ for index, row in df.iterrows():
 
 # calc mae
 df['actual_score'] = df_actual['actual_score']
+#df['score_diff'] = df['actual_score'] - df['score']
 print("Weight = {0}".format(wt))
 print(mean_absolute_error(df['actual_score'], df['score']))
 print(mean_absolute_percentage_error(df['actual_score'], df['score']))
 
-#df.to_csv('./results/predicted_scores.csv', index=False)
+df.to_csv('./results/predicted_scores.csv', index=False)
