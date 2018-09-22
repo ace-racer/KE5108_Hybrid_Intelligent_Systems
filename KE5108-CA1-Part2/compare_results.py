@@ -7,6 +7,7 @@ import itertools
 
 NUM_CUSTOMERS = 400
 
+
 def plot_confusion_matrix(cm, classes,
                           normalize=False,
                           title='Confusion matrix',
@@ -42,18 +43,20 @@ def plot_confusion_matrix(cm, classes,
     plt.xlabel('Predicted label')
     plt.show()
 
+
 def compare_status_score_with_actuals(actuals_df, current_df):
     if actuals_df is not None and current_df is not None:
         required_customer_ids = current_df["index"]
-        actual_status_scores_for_required_customers = actuals_df[actuals_df["index"].isin(required_customer_ids)][["index", "status", "score"]].reset_index(drop=True)
+        actual_status_scores_for_required_customers = actuals_df[actuals_df["index"].isin(required_customer_ids)][
+            ["index", "status", "score"]].reset_index(drop=True)
         actual_status_scores_for_required_customers.sort_values(by="index", inplace=True)
         current_df.sort_values(by="index", inplace=True)
-        #print(actual_status_scores_for_required_customers)
+        # print(actual_status_scores_for_required_customers)
         current_df["actual_status"] = actual_status_scores_for_required_customers["status"]
         current_df["actual_score"] = actual_status_scores_for_required_customers["score"]
         current_df["is_status_diff"] = current_df["actual_status"] != current_df["status"]
         current_df["absolute_score_diff"] = abs(current_df["actual_score"] - current_df["score"])
-        #print(current_df)
+        # print(current_df)
         current_df.to_csv("results/comparison_results.csv", index=False)
         print("Generated the comparison results here: {0}".format("results/comparison_results.csv"))
 
@@ -62,19 +65,22 @@ def compare_status_score_with_actuals(actuals_df, current_df):
 
         cm = confusion_matrix(current_df["actual_status"], current_df["status"])
         a = accuracy_score(current_df["actual_status"], current_df["status"])
-        
-        precision, recall, fscore, support = precision_recall_fscore_support(current_df["actual_status"], current_df["status"], labels=["None", "A", "B"])
+
+        precision, recall, fscore, support = precision_recall_fscore_support(current_df["actual_status"],
+                                                                             current_df["status"],
+                                                                             labels=["None", "A", "B"])
         score_dict = {
-        "precision": precision.round(4),
-        "recall": recall.round(4),
-        "f1-score": fscore.round(4),
-        "support": support
+            "precision": precision.round(4),
+            "recall": recall.round(4),
+            "f1-score": fscore.round(4),
+            "support": support
         }
         score_df = pd.DataFrame(score_dict, index=["None", "A", "B"])
         print(score_df)
         print("Accuracy: {0}".format(a))
-        #print("F1 score: {0}".format(f1))
+        # print("F1 score: {0}".format(f1))
         plot_confusion_matrix(cm, classes=["A", "B", "None"], title='Confusion matrix, in numbers')
+
 
 if __name__ == "__main__":
     """python compare_results.py "H:\\KE 5108 - CAs\\code\\KE 5108 -CA1-Part 2\\working_data\\trial_output.csv" """
@@ -84,7 +90,7 @@ if __name__ == "__main__":
         current_df = pd.read_csv(sys.argv[1], header=0, index_col=False)
         actuals_df = pd.read_csv("original_data/cust_actual_merged.csv", header=0, index_col=False)
 
-        #if current_df.shape[0] != NUM_CUSTOMERS:
-            #raise ValueError("Number of customers in the current file should be {0}".format(NUM_CUSTOMERS))
+        # if current_df.shape[0] != NUM_CUSTOMERS:
+        # raise ValueError("Number of customers in the current file should be {0}".format(NUM_CUSTOMERS))
 
         compare_status_score_with_actuals(actuals_df, current_df)
