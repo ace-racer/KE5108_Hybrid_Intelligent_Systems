@@ -2,7 +2,6 @@ import numpy as np
 import skfuzzy.control as ctrl
 import skfuzzy as fuzz
 import pandas as pd
-from sklearn.metrics import mean_absolute_error
 
 
 def mean_absolute_percentage_error(y_true, y_pred):
@@ -169,8 +168,6 @@ pf = PersonalFactors()
 
 
 df = pd.read_csv('./original_data/custdatabase.csv')
-
-df_actual = pd.read_csv('./results/comparison_results.csv')
 df = df.rename(columns=lambda x: x.strip())
 #
 # for wt in [-0.5, -0.45, -0.4, -0.35]:
@@ -182,28 +179,20 @@ for index, row in df.iterrows():
     final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
     df.loc[index, 'score'] = round(final_score, 2)
 
-# calc mae
-df['actual_score'] = df_actual['actual_score']
-# df['score_diff'] = df['actual_score'] - df['score']
-print("Weight = {0}".format(wt))
-print(mean_absolute_error(df['actual_score'], df['score']))
-print(mean_absolute_percentage_error(df['actual_score'], df['score']))
-
 df.to_csv('./results/predicted_scores.csv', index=False)
 
-
-df_trial = pd.read_csv('./original_data/trialPromoResults.csv')
-df_trial = df_trial.rename(columns=lambda x: x.strip())
-df = df_trial
-wt = -0.45
-for index, row in df.iterrows():
-    afscore = af.calculate(row)
-    pfscore = pf.calculate(row)
-    # wt = -0.45  # weigh heavily towards account factors : full range (-0.5, 0.5)
-    final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
-    df.loc[index, 'score'] = round(final_score, 2)
-
-df.drop(df.columns[0],axis=1,inplace=True)
-
-
-df.to_csv('./results/trialPromoResults_withIPscores.csv', index=False)
+# df_trial = pd.read_csv('./original_data/trialPromoResults.csv')
+# df_trial = df_trial.rename(columns=lambda x: x.strip())
+# df = df_trial
+# wt = -0.45
+# for index, row in df.iterrows():
+#     afscore = af.calculate(row)
+#     pfscore = pf.calculate(row)
+#     # wt = -0.45  # weigh heavily towards account factors : full range (-0.5, 0.5)
+#     final_score = ((1 - wt) * afscore + (1 + wt) * pfscore) * 0.5
+#     df.loc[index, 'score'] = round(final_score, 2)
+#
+# df.drop(df.columns[0],axis=1,inplace=True)
+#
+#
+# df.to_csv('./results/trialPromoResults_withIPscores.csv', index=False)
